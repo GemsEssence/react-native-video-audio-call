@@ -1,15 +1,13 @@
 import requestCameraAndAudioPermission from '../permission';
 import React, {Component} from 'react';
 import {View, Text, TouchableOpacity, Platform} from 'react-native';
-import RtcEngine, {RtcLocalView, RtcRemoteView} from 'react-native-agora';
+import RtcEngine, {RtcRemoteView} from 'react-native-agora';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import styles from './Style';
 
-let LocalView = RtcLocalView.SurfaceView;
 let RemoteView = RtcRemoteView.SurfaceView;
 let engine;
-
 class Audio extends Component {
   constructor(props) {
     super(props);
@@ -191,19 +189,27 @@ class Audio extends Component {
             <TouchableOpacity
               onPress={this.toggleMute}
               style={styles.endCallBtn}>
-              <Text style={styles.buttonText}>
-                {isMute ? 'Unmute' : 'Mute'}
-              </Text>
+              <MaterialIcons
+                size={30}
+                style={styles.buttonText}
+                name={isMute ? 'mic' : 'mic-off'}
+              />
             </TouchableOpacity>
             <TouchableOpacity onPress={this.endCall} style={styles.endCallBtn}>
-              <Text style={styles.buttonText}> End Call </Text>
+              <MaterialIcons
+                size={30}
+                style={styles.buttonText}
+                name="call-end"
+              />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={this.toggleSpeaker}
               style={styles.endCallBtn}>
-              <Text style={styles.buttonText}>
-                {enableSpeaker ? 'Ear piece' : 'Loudspeaker'}
-              </Text>
+              <MaterialIcons
+                size={30}
+                style={styles.buttonText}
+                name={enableSpeaker ? 'hearing' : 'speaker'}
+              />
             </TouchableOpacity>
           </View>
         )}

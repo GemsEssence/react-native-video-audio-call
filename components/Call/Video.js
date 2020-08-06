@@ -185,19 +185,27 @@ class Video extends Component {
             <TouchableOpacity
               onPress={this.toggleMute}
               style={styles.endCallBtn}>
-              <Text style={styles.buttonText}>
-                {isMute ? 'Unmute' : 'Mute'}
-              </Text>
+              <MaterialIcons
+                size={30}
+                style={styles.buttonText}
+                name={isMute ? 'mic' : 'mic-off'}
+              />
             </TouchableOpacity>
             <TouchableOpacity onPress={this.endCall} style={styles.endCallBtn}>
-              <Text style={styles.buttonText}> End Call </Text>
+              <MaterialIcons
+                size={30}
+                style={styles.buttonText}
+                name="call-end"
+              />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={this.toggleVideo}
               style={styles.endCallBtn}>
-              <Text style={styles.buttonText}>
-                {showVideo ? 'Stop Video' : 'Show Video'}
-              </Text>
+              <MaterialIcons
+                size={30}
+                style={styles.buttonText}
+                name={showVideo ? 'videocam' : 'videocam-off'}
+              />
             </TouchableOpacity>
           </View>
         )}
