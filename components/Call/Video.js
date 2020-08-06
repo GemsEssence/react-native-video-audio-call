@@ -1,6 +1,6 @@
 import requestCameraAndAudioPermission from '../permission';
 import React, {Component} from 'react';
-import {View, Text, TouchableOpacity, Platform} from 'react-native';
+import {View, Text, TouchableOpacity, Platform, Alert} from 'react-native';
 import RtcEngine, {RtcLocalView, RtcRemoteView} from 'react-native-agora';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -21,6 +21,7 @@ class Video extends Component {
       joinSucceed: false,
       isMute: false,
       showVideo: true,
+      showFrontCam: true,
     };
     if (Platform.OS === 'android') {
       requestCameraAndAudioPermission().then(_ => {
@@ -52,13 +53,38 @@ class Video extends Component {
     this.startCall();
   }
 
+  callWaiting = () => {
+    this.timeout = setTimeout(() => {
+      if (this.state.peerIds.length === 0) {
+        Alert.alert(
+          'Call Disconnected',
+          "Receiver didn't picked the call",
+          [
+            {
+              text: 'Call Again',
+              onPress: () => this.startCall(),
+              style: 'cancel',
+            },
+            {
+              text: 'Cancel',
+              onPress: () => this.endCall(),
+            },
+          ],
+          {cancelable: false},
+        );
+      }
+    }, 30000);
+  };
+
   startCall = () => {
+    // this.callWaiting();
     this.setState({joinSucceed: true});
     engine.joinChannel(null, this.state.channelName, null, 0);
   };
 
   endCall = () => {
     engine.leaveChannel();
+    clearTimeout(this.timeout);
     this.setState({peerIds: [], joinSucceed: false});
     this.props.navigation.goBack();
   };
@@ -80,7 +106,7 @@ class Video extends Component {
     this.setState(
       prevState => ({showVideo: !prevState.showVideo}),
       () => {
-        if (this.state.showVideo) {
+        if (!this.state.showVideo) {
           engine.enableLocalVideo(false);
         } else {
           engine.enableLocalVideo(true);
@@ -89,8 +115,28 @@ class Video extends Component {
     );
   };
 
+  toggleFrontCamera = () => {
+    this.setState(
+      prevState => ({showFrontCam: !prevState.showFrontCam}),
+      () => {
+        if (!this.state.showFrontCam) {
+          engine.enableLocalVideo(false);
+        } else {
+          engine.enableLocalVideo(true);
+        }
+      },
+    );
+  }
+
   videoView() {
-    const {joinSucceed, peerIds, channelName, showVideo, isMute} = this.state;
+    const {
+      joinSucceed,
+      peerIds,
+      channelName,
+      showVideo,
+      isMute,
+      showFrontCam,
+    } = this.state;
     return (
       <View style={styles.max}>
         {!joinSucceed ? (
@@ -165,32 +211,50 @@ class Video extends Component {
                   renderMode={1}
                 />
               </View>
-            ) : peerIds.length > 0 ? ( //view for videostream
+            ) : peerIds.length > 0 ? (
               <RemoteView style={styles.full} uid={peerIds[0]} renderMode={1} />
             ) : (
-              <View>
-                <Text style={styles.noUserText}> No users connected </Text>
+              <View style={[styles.full, styles.ringing]}>
+                <Text style={{fontSize: 25}}>Ringing....!</Text>
               </View>
             )}
             <LocalView
-              style={styles.localVideoStyle} //view for local videofeed
+              style={
+                peerIds.length === 0 ? styles.full : styles.localVideoStyle
+              }
               channelId={channelName}
               renderMode={1}
               zOrderMediaOverlay={true}
             />
+            {/* <TouchableOpacity
+              onPress={this.toggleFrontCamera}
+              style={styles.toggleCamera}>
+              <MaterialIcons
+                size={30}
+                style={styles.buttonText}
+                name={showFrontCam ? 'mic' : 'mic-off'}
+              />
+            </TouchableOpacity> */}
+            {!showVideo && (
+              <View style={[styles.localVideoStyle, styles.blurView]}>
+                <Text style={styles.buttonText}>Camera Off</Text>
+              </View>
+            )}
           </View>
         )}
         {joinSucceed && (
           <View style={styles.callFooterContainer}>
-            <TouchableOpacity
-              onPress={this.toggleMute}
-              style={styles.endCallBtn}>
-              <MaterialIcons
-                size={30}
-                style={styles.buttonText}
-                name={isMute ? 'mic' : 'mic-off'}
-              />
-            </TouchableOpacity>
+            {peerIds.length > 0 && (
+              <TouchableOpacity
+                onPress={this.toggleMute}
+                style={styles.endCallBtn}>
+                <MaterialIcons
+                  size={30}
+                  style={styles.buttonText}
+                  name={isMute ? 'mic' : 'mic-off'}
+                />
+              </TouchableOpacity>
+            )}
             <TouchableOpacity onPress={this.endCall} style={styles.endCallBtn}>
               <MaterialIcons
                 size={30}
@@ -198,15 +262,17 @@ class Video extends Component {
                 name="call-end"
               />
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={this.toggleVideo}
-              style={styles.endCallBtn}>
-              <MaterialIcons
-                size={30}
-                style={styles.buttonText}
-                name={showVideo ? 'videocam' : 'videocam-off'}
-              />
-            </TouchableOpacity>
+            {peerIds.length > 0 && (
+              <TouchableOpacity
+                onPress={this.toggleVideo}
+                style={styles.endCallBtn}>
+                <MaterialIcons
+                  size={30}
+                  style={styles.buttonText}
+                  name={showVideo ? 'videocam' : 'videocam-off'}
+                />
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </View>

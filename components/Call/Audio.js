@@ -30,7 +30,7 @@ class Audio extends Component {
   async componentDidMount() {
     let self = this;
     engine = await RtcEngine.create(self.state.appid);
-
+    engine.disableVideo();
     engine.addListener('UserJoined', data => {
       const {peerIds} = self.state;
       if (peerIds.indexOf(data) === -1) {
@@ -79,9 +79,9 @@ class Audio extends Component {
       prevState => ({enableSpeaker: !prevState.enableSpeaker}),
       () => {
         if (this.state.enableSpeaker) {
-          engine.enableLocalVideo(false);
+          engine.setEnableSpeakerphone(false);
         } else {
-          engine.enableLocalVideo(true);
+          engine.setEnableSpeakerphone(true);
         }
       },
     );
