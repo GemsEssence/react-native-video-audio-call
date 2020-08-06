@@ -5593,9 +5593,9 @@ react-is@^16.12.0, react-is@^16.13.0, react-is@^16.8.1, react-is@^16.8.4, react-
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
 react-native-agora@^3.0.1-beta.7:
-  version "3.0.1-beta.7"
-  resolved "https://registry.yarnpkg.com/react-native-agora/-/react-native-agora-3.0.1-beta.7.tgz#5c945c25b080a282f678abe07113fbb884ecf6ab"
-  integrity sha512-HxPt76CZDabkwYEJaB6541oAuxGEanE3h0P6ZyDAq4nZ3wZm6TDiolAstrkWo1nIetSa41UbKmRLFwd0h66NbA==
+  version "3.0.1-rc.4"
+  resolved "https://registry.yarnpkg.com/react-native-agora/-/react-native-agora-3.0.1-rc.4.tgz#4d1e0894c2d6e2c9217cf25116f403cfda27cf1e"
+  integrity sha512-ZI2pgOnFQHpRSCR0Src+zB+xGg0DspXdSqjQDUClJqDTxXE2RgjwwjC/36iiXP7rhCDI4QlInqWeiK9Sepi0VQ==
 
 react-native-gesture-handler@^1.7.0:
   version "1.7.0"
