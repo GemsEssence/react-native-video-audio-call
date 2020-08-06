@@ -77,7 +77,7 @@ class Video extends Component {
   };
 
   startCall = () => {
-    // this.callWaiting();
+    this.callWaiting();
     this.setState({joinSucceed: true});
     engine.joinChannel(null, this.state.channelName, null, 0);
   };
