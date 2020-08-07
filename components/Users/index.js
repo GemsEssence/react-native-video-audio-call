@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, TouchableOpacity, Text, FlatList} from 'react-native';
+import {View, TouchableOpacity, Text, FlatList, Alert} from 'react-native';
 import database from '@react-native-firebase/database';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -9,6 +9,11 @@ const Users = (props) => {
   const [users, handleUsers] = useState([]);
   const {user} = props.route.params;
   useEffect(() => {
+    database()
+      .ref('/callRecords/')
+      .on('value', (snapshot) => {
+        console.log(snapshot.val());
+      });
     database()
       .ref('/users/')
       .on('value', (snapshot) => {
@@ -45,12 +50,12 @@ const Users = (props) => {
         </View>
         <View style={styles.row}>
           <TouchableOpacity
-            onPress={() => initiateCall('Audio', item.item.mobile)}
+            onPress={() => initiateCall('Audio', item.item)}
             style={[styles.callBtn, {marginRight: 10}]}>
             <MaterialIcons size={30} color="#0093E9" name="local-phone" />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => initiateCall('Video', item.item.mobile)}
+            onPress={() => initiateCall('Video', item.item)}
             style={styles.callBtn}>
             <MaterialIcons size={30} color="#0093E9" name="video-call" />
           </TouchableOpacity>
@@ -60,28 +65,51 @@ const Users = (props) => {
   };
 
   const initiateCall = (type, receiver) => {
-    const channel1 = `${user.mobile}-${receiver}`;
-    const channel2 = `${receiver}-${user.mobile}`;
-    database()
-      .ref(`/channels/${channel1}`)
-      .on('value', (snapshot) => {
-        if (snapshot.val()) {
-          props.navigation.navigate(type, {user, channel: channel1});
-        } else {
+    const channel1 = `${user.mobile}-${receiver.mobile}`;
+    const channel2 = `${receiver.mobile}-${user.mobile}`;
+    // database()
+    //   .ref(`/callRecords/${receiver.mobile}`)
+    //   .on('value', (snapshot) => {
+    //     if (snapshot.val()) {
+    //       Alert.alert(
+    //         'Call cannot be connected',
+    //         `${receiver.name}  (${receiver.mobile}) is busy on another call, please try again later!`,
+    //       );
+    //     } else {
           database()
-            .ref(`/channels/${channel2}`)
+            .ref(`/channels/${channel1}`)
             .on('value', (snapshot) => {
               if (snapshot.val()) {
-                props.navigation.navigate(type, {user, channel: channel2});
+                props.navigation.navigate(type, {
+                  user,
+                  receiver,
+                  channel: channel1,
+                });
               } else {
                 database()
-                  .ref(`/channels/${channel1}`)
-                  .set({channel: channel1});
-                props.navigation.navigate(type, {user, channel: channel1});
+                  .ref(`/channels/${channel2}`)
+                  .on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                      props.navigation.navigate(type, {
+                        user,
+                        receiver,
+                        channel: channel2,
+                      });
+                    } else {
+                      database()
+                        .ref(`/channels/${channel1}`)
+                        .set({channel: channel1});
+                      props.navigation.navigate(type, {
+                        user,
+                        receiver,
+                        channel: channel1,
+                      });
+                    }
+                  });
               }
             });
-        }
-      });
+        // }
+      // });
   };
   return (
     <View style={styles.container}>

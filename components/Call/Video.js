@@ -11,6 +11,7 @@ import {
 import RtcEngine, {RtcLocalView, RtcRemoteView} from 'react-native-agora';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import KeepAwake from 'react-native-keep-awake';
+import database from '@react-native-firebase/database';
 
 import styles from './Style';
 
@@ -96,6 +97,8 @@ class Video extends Component {
   };
 
   endCall = () => {
+    const {timestamp} = this.props.route.params;
+    database().ref(`/callRecords/${timestamp}`).remove();
     engine.leaveChannel();
     clearTimeout(this.timeout);
     this.setState({peerIds: [], joinSucceed: false});
