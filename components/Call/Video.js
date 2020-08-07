@@ -42,20 +42,20 @@ class Video extends Component {
     let self = this;
     engine = await RtcEngine.create(self.state.appid);
     engine.enableVideo();
-    engine.addListener('UserJoined', data => {
+    engine.addListener('UserJoined', (data) => {
       const {peerIds} = self.state;
       if (peerIds.indexOf(data) === -1) {
         self.setState({peerIds: [...peerIds, data]});
       }
     });
 
-    engine.addListener('UserOffline', data => {
+    engine.addListener('UserOffline', (data) => {
       self.setState({
-        peerIds: self.state.peerIds.filter(uid => uid !== data),
+        peerIds: self.state.peerIds.filter((uid) => uid !== data),
       });
     });
 
-    engine.addListener('JoinChannelSuccess', data => {
+    engine.addListener('JoinChannelSuccess', (data) => {
       self.setState({joinSucceed: true});
     });
     this.startCall();
@@ -63,7 +63,6 @@ class Video extends Component {
 
   callWaiting = () => {
     this.timeout = setTimeout(() => {
-      console.log('this.state.peerIds---->', this.state.peerIds);
       if (this.state.peerIds.length === 0) {
         Alert.alert(
           'Call Disconnected',
@@ -105,7 +104,7 @@ class Video extends Component {
 
   toggleMute = () => {
     this.setState(
-      prevState => ({isMute: !prevState.isMute}),
+      (prevState) => ({isMute: !prevState.isMute}),
       () => {
         if (this.state.isMute) {
           engine.enableLocalAudio(false);
@@ -118,7 +117,7 @@ class Video extends Component {
 
   toggleVideo = () => {
     this.setState(
-      prevState => ({showVideo: !prevState.showVideo}),
+      (prevState) => ({showVideo: !prevState.showVideo}),
       () => {
         if (!this.state.showVideo) {
           engine.enableLocalVideo(false);

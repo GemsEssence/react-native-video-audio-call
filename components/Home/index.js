@@ -1,14 +1,28 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, TouchableOpacity, Text, TextInput, Alert} from 'react-native';
+import database from '@react-native-firebase/database';
 
 import styles from './styles';
 
-const Home = props => {
+const Home = (props) => {
   const [channel, handleChannel] = useState('channel-x');
-  const [user, handleUser] = useState('test');
-
+  const [mobile, handleMobileNo] = useState('test');
+  const [name, handleName] = useState('');
+  useEffect(() => {
+    if (mobile.trim().length === 10) {
+      database()
+        .ref(`/users/${mobile}`)
+        .on('value', (snapshot) => {
+          console.log('User data: ', snapshot.val());
+          if (snapshot.val()) {
+            handleName(snapshot.val());
+          }
+        });
+    }
+  }, [mobile]);
   const handleGo = () => {
-    if (channel.trim().length > 0 && user.trim().length > 0) {
+    const user = {mobile, name};
+    if (channel.trim().length > 0 && user.mobile.trim().length === 10) {
       props.navigation.navigate('Call', {user, channel});
     } else {
       Alert.alert(
@@ -22,15 +36,15 @@ const Home = props => {
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        placeholder="Enter Your Name"
-        value={user}
-        onChangeText={handleUser}
+        placeholder="Enter Your Mobile Number"
+        value={mobile}
+        onChangeText={handleMobileNo}
       />
       <TextInput
         style={styles.input}
-        placeholder="Enter Channel Id"
-        value={channel}
-        onChangeText={handleChannel}
+        placeholder="Enter Your Name"
+        value={name}
+        onChangeText={handleName}
       />
       <TouchableOpacity style={styles.btn} onPress={handleGo}>
         <Text>Go</Text>
