@@ -107,8 +107,8 @@ export default StyleSheet.create({
         backgroundColor: 'lightgrey',
     },
     toggleCamera: {
-        top: 50,
-        right: 50,
+        top: 20,
+        left: 20,
         position: 'absolute',
         zIndex: 9,
     },

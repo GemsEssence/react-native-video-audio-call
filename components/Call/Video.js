@@ -1,6 +1,13 @@
 import requestCameraAndAudioPermission from '../permission';
 import React, {Component} from 'react';
-import {View, Text, TouchableOpacity, Platform, Alert} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Platform,
+  Alert,
+  Pressable,
+} from 'react-native';
 import RtcEngine, {RtcLocalView, RtcRemoteView} from 'react-native-agora';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -21,7 +28,7 @@ class Video extends Component {
       joinSucceed: false,
       isMute: false,
       showVideo: true,
-      showFrontCam: true,
+      showFooterButtons: true,
     };
     if (Platform.OS === 'android') {
       requestCameraAndAudioPermission().then(_ => {
@@ -77,6 +84,10 @@ class Video extends Component {
   };
 
   startCall = () => {
+    this.timeout = setTimeout(
+      () => this.setState(() => ({showFooterButtons: false})),
+      5000,
+    );
     this.callWaiting();
     this.setState({joinSucceed: true});
     engine.joinChannel(null, this.state.channelName, null, 0);
@@ -115,18 +126,14 @@ class Video extends Component {
     );
   };
 
-  toggleFrontCamera = () => {
-    this.setState(
-      prevState => ({showFrontCam: !prevState.showFrontCam}),
-      () => {
-        if (!this.state.showFrontCam) {
-          engine.enableLocalVideo(false);
-        } else {
-          engine.enableLocalVideo(true);
-        }
-      },
+  toggleFooterButtons = () => {
+    clearTimeout(this.timeout);
+    this.setState(() => ({showFooterButtons: true}));
+    this.timeout = setTimeout(
+      () => this.setState(() => ({showFooterButtons: false})),
+      5000,
     );
-  }
+  };
 
   videoView() {
     const {
@@ -135,10 +142,10 @@ class Video extends Component {
       channelName,
       showVideo,
       isMute,
-      showFrontCam,
+      showFooterButtons,
     } = this.state;
     return (
-      <View style={styles.max}>
+      <Pressable onPress={this.toggleFooterButtons} style={styles.max}>
         {!joinSucceed ? (
           <View />
         ) : (
@@ -226,15 +233,17 @@ class Video extends Component {
               renderMode={1}
               zOrderMediaOverlay={true}
             />
-            {/* <TouchableOpacity
-              onPress={this.toggleFrontCamera}
-              style={styles.toggleCamera}>
-              <MaterialIcons
-                size={30}
-                style={styles.buttonText}
-                name={showFrontCam ? 'mic' : 'mic-off'}
-              />
-            </TouchableOpacity> */}
+            {peerIds.length > 0 && (
+              <TouchableOpacity
+                onPress={() => engine.switchCamera()}
+                style={styles.toggleCamera}>
+                <MaterialIcons
+                  size={30}
+                  style={styles.buttonText}
+                  name="switch-camera"
+                />
+              </TouchableOpacity>
+            )}
             {!showVideo && (
               <View style={[styles.localVideoStyle, styles.blurView]}>
                 <Text style={styles.buttonText}>Camera Off</Text>
@@ -242,7 +251,7 @@ class Video extends Component {
             )}
           </View>
         )}
-        {joinSucceed && (
+        {joinSucceed && showFooterButtons && (
           <View style={styles.callFooterContainer}>
             {peerIds.length > 0 && (
               <TouchableOpacity
@@ -275,7 +284,7 @@ class Video extends Component {
             )}
           </View>
         )}
-      </View>
+      </Pressable>
     );
   }
   render() {
