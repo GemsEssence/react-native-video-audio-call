@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import RtcEngine, {RtcLocalView, RtcRemoteView} from 'react-native-agora';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import KeepAwake from 'react-native-keep-awake';
 
 import styles from './Style';
 
@@ -62,6 +63,7 @@ class Video extends Component {
 
   callWaiting = () => {
     this.timeout = setTimeout(() => {
+      console.log('this.state.peerIds---->', this.state.peerIds);
       if (this.state.peerIds.length === 0) {
         Alert.alert(
           'Call Disconnected',
@@ -84,6 +86,7 @@ class Video extends Component {
   };
 
   startCall = () => {
+    KeepAwake.activate();
     this.timeout = setTimeout(
       () => this.setState(() => ({showFooterButtons: false})),
       5000,
@@ -134,6 +137,11 @@ class Video extends Component {
       5000,
     );
   };
+
+  componentWillUnmount() {
+    KeepAwake.deactivate();
+    this.endCall();
+  }
 
   videoView() {
     const {
