@@ -41,6 +41,10 @@ class Video extends Component {
 
   async componentDidMount() {
     let self = this;
+    const {receiver, user, channel} = this.props.route.params;
+    database()
+      .ref(`/callRecords/${receiver.mobile}`)
+      .set({receiver, user, channel});
     engine = await RtcEngine.create(self.state.appid);
     engine.enableVideo();
     engine.addListener('UserJoined', (data) => {
@@ -81,6 +85,16 @@ class Video extends Component {
           ],
           {cancelable: false},
         );
+      } else {
+        const {receiver} = this.props.route.params;
+        // database()
+        //   .ref(`/callRecords/${receiver.mobile}`)
+        //   .on('value', (snapshot) => {
+        //     console.log(snapshot.val());
+        //     if (!snapshot.val()) {
+        //       this.endCall();
+        //     }
+        //   });
       }
     }, 30000);
   };

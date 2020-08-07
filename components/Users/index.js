@@ -12,7 +12,12 @@ const Users = (props) => {
     database()
       .ref('/callRecords/')
       .on('value', (snapshot) => {
-        console.log(snapshot.val());
+        if (snapshot.val()) {
+          const keys = Object.keys(snapshot.val());
+          if (keys.includes(user.mobile)) {
+            alert('you have an incoming call !!!');
+          }
+        }
       });
     database()
       .ref('/users/')
@@ -75,6 +80,7 @@ const Users = (props) => {
     //         'Call cannot be connected',
     //         `${receiver.name}  (${receiver.mobile}) is busy on another call, please try again later!`,
     //       );
+    //       return false;
     //     } else {
           database()
             .ref(`/channels/${channel1}`)
@@ -108,7 +114,7 @@ const Users = (props) => {
                   });
               }
             });
-        // }
+      //   }
       // });
   };
   return (
