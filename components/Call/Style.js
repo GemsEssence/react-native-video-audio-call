@@ -2,6 +2,8 @@
 
 import { StyleSheet, Dimensions } from 'react-native';
 
+const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+
 let dimensions = {
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
@@ -16,7 +18,6 @@ export default StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row',
-        flex: 1,
     },
     buttonHolder: {
         height: 100,
@@ -70,16 +71,18 @@ export default StyleSheet.create({
         borderRadius: 5,
     },
     nameBubble: {
-        backgroundColor: 'lightgrey',
+        backgroundColor: randomColor,
         paddingHorizontal: 20,
         paddingVertical: 10,
         borderRadius: 50,
         fontSize: 25,
         fontWeight: 'bold',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     innerBubble: {
         opacity: 0.8,
-        backgroundColor: 'lightgrey',
+        backgroundColor: randomColor,
         padding: 15,
         borderRadius: 50,
     },
@@ -111,5 +114,26 @@ export default StyleSheet.create({
         left: 20,
         position: 'absolute',
         zIndex: 9,
+    },
+    bubbleText: {
+        fontWeight: 'bold',
+        color: 'white',
+        fontSize: 100,
+    },
+    callNameBubble: {
+        width: 200,
+        height: 200,
+        backgroundColor: randomColor,
+    },
+    callView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingTop: '20%',
+        backgroundColor: 'white',
+    },
+    callerText: {
+        fontSize: 25,
+        marginBottom: 50,
     },
 });

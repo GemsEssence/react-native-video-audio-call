@@ -15,7 +15,14 @@ const Users = (props) => {
         if (snapshot.val()) {
           const keys = Object.keys(snapshot.val());
           if (keys.includes(user.mobile)) {
-            alert('you have an incoming call !!!');
+            const {type, receiver, channel} = snapshot.val()[user.mobile];
+            const dbUser = snapshot.val()[user.mobile].user;
+            props.navigation.navigate('Call', {
+              type,
+              user: dbUser,
+              receiver,
+              channel,
+            });
           }
         }
       });
@@ -72,6 +79,7 @@ const Users = (props) => {
   const initiateCall = (type, receiver) => {
     const channel1 = `${user.mobile}-${receiver.mobile}`;
     const channel2 = `${receiver.mobile}-${user.mobile}`;
+    let channel = channel1;
     // database()
     //   .ref(`/callRecords/${receiver.mobile}`)
     //   .on('value', (snapshot) => {
@@ -82,40 +90,35 @@ const Users = (props) => {
     //       );
     //       return false;
     //     } else {
+    database()
+      .ref(`/channels/${channel1}`)
+      .on('value', (snapshot) => {
+        console.log('channel 1', snapshot.val());
+        if (!snapshot.val()) {
           database()
-            .ref(`/channels/${channel1}`)
+            .ref(`/channels/${channel2}`)
             .on('value', (snapshot) => {
               if (snapshot.val()) {
-                props.navigation.navigate(type, {
-                  user,
-                  receiver,
-                  channel: channel1,
-                });
+                channel = channel2;
               } else {
                 database()
-                  .ref(`/channels/${channel2}`)
-                  .on('value', (snapshot) => {
-                    if (snapshot.val()) {
-                      props.navigation.navigate(type, {
-                        user,
-                        receiver,
-                        channel: channel2,
-                      });
-                    } else {
-                      database()
-                        .ref(`/channels/${channel1}`)
-                        .set({channel: channel1});
-                      props.navigation.navigate(type, {
-                        user,
-                        receiver,
-                        channel: channel1,
-                      });
-                    }
-                  });
+                  .ref(`/channels/${channel1}`)
+                  .set({channel: channel1});
               }
             });
-      //   }
-      // });
+        }
+        database()
+          .ref(`/callRecords/${receiver.mobile}`)
+          .set({receiver, user, channel, type});
+        props.navigation.navigate(type, {
+          user,
+          receiver,
+          channel,
+          type,
+        });
+      });
+    //   }
+    // });
   };
   return (
     <View style={styles.container}>

@@ -6,7 +6,7 @@ import messaging from '@react-native-firebase/messaging';
 import styles from './styles';
 
 const Home = (props) => {
-  const [mobile, handleMobileNo] = useState('1234567898');
+  const [mobile, handleMobileNo] = useState('2222222222');
   const [name, handleName] = useState('');
   const [isUserExisting, handleExistingUser] = useState(false);
   useEffect(() => {

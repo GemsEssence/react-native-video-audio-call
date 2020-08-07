@@ -41,10 +41,6 @@ class Video extends Component {
 
   async componentDidMount() {
     let self = this;
-    const {receiver, user, channel} = this.props.route.params;
-    database()
-      .ref(`/callRecords/${receiver.mobile}`)
-      .set({receiver, user, channel});
     engine = await RtcEngine.create(self.state.appid);
     engine.enableVideo();
     engine.addListener('UserJoined', (data) => {
@@ -111,8 +107,8 @@ class Video extends Component {
   };
 
   endCall = () => {
-    const {timestamp} = this.props.route.params;
-    database().ref(`/callRecords/${timestamp}`).remove();
+    const {receiver} = this.props.route.params;
+    database().ref(`/callRecords/${receiver.mobile}`).remove();
     engine.leaveChannel();
     clearTimeout(this.timeout);
     this.setState({peerIds: [], joinSucceed: false});
