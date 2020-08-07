@@ -10,7 +10,7 @@ const Users = (props) => {
   const {user} = props.route.params;
   useEffect(() => {
     database()
-      .ref(`/users/`)
+      .ref('/users/')
       .on('value', (snapshot) => {
         if (snapshot.val()) {
           const keys = Object.keys(snapshot.val());
@@ -92,7 +92,7 @@ const Users = (props) => {
         <FlatList
           data={users}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.mobile}
         />
       </View>
     </View>

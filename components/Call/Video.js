@@ -99,7 +99,7 @@ class Video extends Component {
     engine.leaveChannel();
     clearTimeout(this.timeout);
     this.setState({peerIds: [], joinSucceed: false});
-    this.props.navigation.goBack();
+    this.props.navigation.goBack(1);
   };
 
   toggleMute = () => {
@@ -139,7 +139,6 @@ class Video extends Component {
 
   componentWillUnmount() {
     KeepAwake.deactivate();
-    this.endCall();
   }
 
   videoView() {

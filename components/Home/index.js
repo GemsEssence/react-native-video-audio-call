@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {View, TouchableOpacity, Text, TextInput, Alert} from 'react-native';
 import database from '@react-native-firebase/database';
+import messaging from '@react-native-firebase/messaging';
 
 import styles from './styles';
 
@@ -26,10 +27,15 @@ const Home = (props) => {
   const handleGo = () => {
     const user = {mobile, name};
     if (user.name.trim().length > 0 && user.mobile.trim().length === 10) {
-      if (!isUserExisting) {
-        database().ref(`/users/${mobile}`).set({name});
-      }
-      props.navigation.navigate('Users', {user});
+      messaging()
+        .getToken()
+        .then((fcmToken) => {
+          if (!isUserExisting) {
+            database().ref(`/users/${mobile}`).set({name, fcmToken});
+          }
+          database().ref(`/users/${mobile}`).update({fcmToken});
+          props.navigation.navigate('Users', {user});
+        });
     } else {
       Alert.alert(
         'Please fill the details',

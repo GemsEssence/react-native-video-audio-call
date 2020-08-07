@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   },
   innerCircle: {
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 50,
     borderWidth: 0.1,
     justifyContent: 'center',
