@@ -5,29 +5,35 @@ import database from '@react-native-firebase/database';
 import styles from './styles';
 
 const Home = (props) => {
-  const [channel, handleChannel] = useState('channel-x');
-  const [mobile, handleMobileNo] = useState('test');
+  const [mobile, handleMobileNo] = useState('1234567898');
   const [name, handleName] = useState('');
+  const [isUserExisting, handleExistingUser] = useState(false);
   useEffect(() => {
     if (mobile.trim().length === 10) {
       database()
         .ref(`/users/${mobile}`)
         .on('value', (snapshot) => {
-          console.log('User data: ', snapshot.val());
           if (snapshot.val()) {
-            handleName(snapshot.val());
+            handleExistingUser(true);
+            handleName(snapshot.val().name);
+          } else {
+            handleExistingUser(false);
+            handleName('');
           }
         });
     }
   }, [mobile]);
   const handleGo = () => {
     const user = {mobile, name};
-    if (channel.trim().length > 0 && user.mobile.trim().length === 10) {
-      props.navigation.navigate('Call', {user, channel});
+    if (user.name.trim().length > 0 && user.mobile.trim().length === 10) {
+      if (!isUserExisting) {
+        database().ref(`/users/${mobile}`).set({name});
+      }
+      props.navigation.navigate('Users', {user});
     } else {
       Alert.alert(
         'Please fill the details',
-        'Channel name and user name are compulsory to add',
+        'Mobile number and user name are compulsory to add',
       );
     }
   };
@@ -41,11 +47,15 @@ const Home = (props) => {
         onChangeText={handleMobileNo}
       />
       <TextInput
+        editable={!isUserExisting}
         style={styles.input}
         placeholder="Enter Your Name"
         value={name}
         onChangeText={handleName}
       />
+      {isUserExisting && (
+        <Text>User Already exist, name cannot be changed!</Text>
+      )}
       <TouchableOpacity style={styles.btn} onPress={handleGo}>
         <Text>Go</Text>
       </TouchableOpacity>

@@ -179,7 +179,9 @@ class Audio extends Component {
             )}
             <View style={styles.localVideoStyle}>
               <View style={styles.innerBubble}>
-                <Text style={styles.nameBubble}>{user[0].toUpperCase()}</Text>
+                <Text style={styles.nameBubble}>
+                  {user.name[0].toUpperCase()}
+                </Text>
               </View>
             </View>
           </View>
