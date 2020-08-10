@@ -2,12 +2,15 @@ import React, {useState, useEffect} from 'react';
 import {View, TouchableOpacity, Text, FlatList, Alert} from 'react-native';
 import database from '@react-native-firebase/database';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {connect} from 'react-redux';
 
 import styles from './styles';
 
 const Users = (props) => {
   const [users, handleUsers] = useState([]);
-  const {user} = props.route.params;
+  const user = props.currentUser;
+  console.log('user----->', user)
+  // const {user} = props.route.params;
   useEffect(() => {
     database()
       .ref('/callRecords/')
@@ -93,7 +96,6 @@ const Users = (props) => {
     database()
       .ref(`/channels/${channel1}`)
       .on('value', (snapshot) => {
-        console.log('channel 1', snapshot.val());
         if (!snapshot.val()) {
           database()
             .ref(`/channels/${channel2}`)
@@ -136,4 +138,8 @@ const Users = (props) => {
   );
 };
 
-export default Users;
+const mapStateToProps = (state) => ({
+  currentUser: state.Users.currentUser,
+});
+
+export default connect(mapStateToProps)(Users);

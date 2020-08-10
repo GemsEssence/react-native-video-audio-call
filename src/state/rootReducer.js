@@ -1,8 +1,8 @@
-import {combineReducer} from 'react-redux';
+import {combineReducers} from 'redux';
 
 import Users from './Users/reducer';
 
-const rootReducer = combineReducer({
+const rootReducer = combineReducers({
   Users,
 });
 

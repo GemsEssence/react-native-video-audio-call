@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {Alert} from 'react-native'
+import {Alert} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import messaging from '@react-native-firebase/messaging';
@@ -9,6 +9,7 @@ import Video from './Call/Video';
 import Audio from './Call/Audio';
 import Call from './Call';
 import Users from './Users';
+import Entry from './index';
 
 const Stack = createStackNavigator();
 
@@ -26,7 +27,8 @@ const Navigation = () => {
   }, []);
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRoute="Home" headerMode="none">
+      <Stack.Navigator initialRoute="Entry" headerMode="none">
+        <Stack.Screen name="Entry" component={Entry} />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Video" component={Video} />
         <Stack.Screen name="Audio" component={Audio} />
