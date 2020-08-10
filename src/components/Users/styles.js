@@ -6,7 +6,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   header: {
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     width: '100%',
     backgroundColor: '#0093E9',
     height: 60,
@@ -16,7 +17,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     elevation: 6.0,
     borderBottomColor: 'lightgrey',
-    paddingLeft: 20,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
   },
   body: {
     padding: 5,

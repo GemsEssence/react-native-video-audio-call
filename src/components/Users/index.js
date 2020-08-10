@@ -3,13 +3,16 @@ import {View, TouchableOpacity, Text, FlatList, Alert} from 'react-native';
 import database from '@react-native-firebase/database';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
 
 import styles from './styles';
+import {logout} from '../../state/Users/actions';
 
 const Users = (props) => {
   const [users, handleUsers] = useState([]);
-  const user = props.currentUser;
-  console.log('user----->', user)
+  const {actions, isAdmin, currentUser, navigation} = props;
+  const user = currentUser;
+
   // const {user} = props.route.params;
   useEffect(() => {
     database()
@@ -20,7 +23,7 @@ const Users = (props) => {
           if (keys.includes(user.mobile)) {
             const {type, receiver, channel} = snapshot.val()[user.mobile];
             const dbUser = snapshot.val()[user.mobile].user;
-            props.navigation.navigate('Call', {
+            navigation.navigate('Call', {
               type,
               user: dbUser,
               receiver,
@@ -49,11 +52,25 @@ const Users = (props) => {
       });
   }, []);
 
+  const deleteUser = (item) => {
+    Alert.alert('Delete User', 'Are you sure you want to delete ?', [
+      {
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
+      },
+      {
+        text: 'OK',
+        onPress: () => database().ref(`/users/${item.mobile}`).remove(),
+      },
+    ]);
+  };
+
   const renderItem = (item) => {
     const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
     return (
       <View key={item.item.mobile} style={styles.listItemContainer}>
-        <View style={styles.row}>
+        <View style={[styles.row, {width: '55%'}]}>
           <View style={[styles.outerCircle, {backgroundColor: randomColor}]}>
             <View style={[styles.innerCircle, {backgroundColor: randomColor}]}>
               <Text style={{fontSize: 18}}>
@@ -61,12 +78,20 @@ const Users = (props) => {
               </Text>
             </View>
           </View>
-          <Text>{`${item.item.name}   (${item.item.mobile})`}</Text>
+          <Text
+            numberOfLines={1}>{`${item.item.name} (${item.item.mobile})`}</Text>
         </View>
         <View style={styles.row}>
+          {isAdmin && (
+            <TouchableOpacity
+              style={[styles.callBtn, {marginRight: 5}]}
+              onPress={() => deleteUser(item.item)}>
+              <MaterialIcons size={30} color="#0093E9" name="delete" />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={() => initiateCall('Audio', item.item)}
-            style={[styles.callBtn, {marginRight: 10}]}>
+            style={[styles.callBtn, {marginRight: 5}]}>
             <MaterialIcons size={30} color="#0093E9" name="local-phone" />
           </TouchableOpacity>
           <TouchableOpacity
@@ -77,6 +102,11 @@ const Users = (props) => {
         </View>
       </View>
     );
+  };
+
+  const logout = () => {
+    actions.logout();
+    navigation.navigate('Home');
   };
 
   const initiateCall = (type, receiver) => {
@@ -112,7 +142,7 @@ const Users = (props) => {
         database()
           .ref(`/callRecords/${receiver.mobile}`)
           .set({receiver, user, channel, type});
-        props.navigation.navigate(type, {
+        navigation.navigate(type, {
           user,
           receiver,
           channel,
@@ -126,6 +156,9 @@ const Users = (props) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Available Users</Text>
+        <TouchableOpacity onPress={logout}>
+          <MaterialIcons name="exit-to-app" size={30} color="white" />
+        </TouchableOpacity>
       </View>
       <View style={styles.body}>
         <FlatList
@@ -140,6 +173,11 @@ const Users = (props) => {
 
 const mapStateToProps = (state) => ({
   currentUser: state.Users.currentUser,
+  isAdmin: state.Users.isAdmin,
 });
 
-export default connect(mapStateToProps)(Users);
+const mapDispatchToProps = (dispatch) => ({
+  actions: bindActionCreators({logout}, dispatch),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Users);

@@ -27,6 +27,7 @@ const Home = (props) => {
         });
     }
   }, [mobile]);
+
   const handleGo = () => {
     const user = {mobile, name};
     if (user.name.trim().length > 0 && user.mobile.trim().length === 10) {
@@ -51,6 +52,8 @@ const Home = (props) => {
   return (
     <View style={styles.container}>
       <TextInput
+        autoFocus
+        editable
         style={styles.input}
         placeholder="Enter Your Mobile Number"
         value={mobile}
