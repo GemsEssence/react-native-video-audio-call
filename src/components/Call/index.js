@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View, Text, TouchableOpacity} from 'react-native';
 import database from '@react-native-firebase/database';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import InCallManager from 'react-native-incall-manager';
 
 import styles from './Style';
 
@@ -9,12 +10,22 @@ const Call = (props) => {
   const {navigation} = props;
   const {user, channel, receiver, type} = props.route.params;
   const timeout = setTimeout(() => rejectCall, 30000);
+
+  useEffect(() => {
+    InCallManager.startRingtone('_BUNDLE_');
+    return () => {
+      InCallManager.stopRingtone();
+    };
+  }, []);
+
   const startCall = () => {
+    InCallManager.stopRingtone();
     clearTimeout(timeout);
     navigation.navigate(type, {user, channel, receiver});
   };
 
   const rejectCall = () => {
+    InCallManager.stopRingtone();
     database().ref(`/callRecords/${receiver.mobile}`).remove();
     navigation.goBack(1);
   };
