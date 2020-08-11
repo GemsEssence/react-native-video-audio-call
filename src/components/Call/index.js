@@ -3,6 +3,8 @@ import {View, Text, TouchableOpacity} from 'react-native';
 import database from '@react-native-firebase/database';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import InCallManager from 'react-native-incall-manager';
+import {CommonActions} from '@react-navigation/native';
+import {connect} from 'react-redux';
 
 import styles from './Style';
 
@@ -27,7 +29,12 @@ const Call = (props) => {
   const rejectCall = () => {
     InCallManager.stopRingtone();
     database().ref(`/callRecords/${receiver.mobile}`).remove();
-    navigation.goBack(1);
+    props.navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{name: 'Users'}],
+      }),
+    );
   };
   return (
     <View style={styles.callView}>
@@ -54,4 +61,8 @@ const Call = (props) => {
   );
 };
 
-export default Call;
+const mapStateToProps = (state) => ({
+  currentUser: state.Users.currentUser,
+});
+
+export default connect(mapStateToProps)(Call);

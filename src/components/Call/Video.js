@@ -12,6 +12,8 @@ import RtcEngine, {RtcLocalView, RtcRemoteView} from 'react-native-agora';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import KeepAwake from 'react-native-keep-awake';
 import database from '@react-native-firebase/database';
+import {CommonActions} from '@react-navigation/native';
+import InCallManager from 'react-native-incall-manager';
 
 import styles from './Style';
 
@@ -81,16 +83,6 @@ class Video extends Component {
           ],
           {cancelable: false},
         );
-      } else {
-        const {receiver} = this.props.route.params;
-        // database()
-        //   .ref(`/callRecords/${receiver.mobile}`)
-        //   .on('value', (snapshot) => {
-        //     console.log(snapshot.val());
-        //     if (!snapshot.val()) {
-        //       this.endCall();
-        //     }
-        //   });
       }
     }, 30000);
   };
@@ -104,15 +96,30 @@ class Video extends Component {
     this.callWaiting();
     this.setState({joinSucceed: true});
     engine.joinChannel(null, this.state.channelName, null, 0);
+    const {receiver} = this.props.route.params;
+    database()
+      .ref(`/callRecords/${receiver.mobile}`)
+      .on('value', (snapshot) => {
+        if (!snapshot.val()) {
+          this.endCall();
+        }
+      });
   };
 
   endCall = () => {
+    InCallManager.stopRingback();
+    InCallManager.stop();
     const {receiver} = this.props.route.params;
     database().ref(`/callRecords/${receiver.mobile}`).remove();
     engine.leaveChannel();
     clearTimeout(this.timeout);
     this.setState({peerIds: [], joinSucceed: false});
-    this.props.navigation.goBack(1);
+    this.props.navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{name: 'Users'}],
+      }),
+    );
   };
 
   toggleMute = () => {

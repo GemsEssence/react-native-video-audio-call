@@ -3,6 +3,7 @@ import React, {Component} from 'react';
 import {View, Text, TouchableOpacity, Platform} from 'react-native';
 import RtcEngine, {RtcRemoteView} from 'react-native-agora';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {CommonActions} from '@react-navigation/native';
 
 import styles from './Style';
 
@@ -58,7 +59,12 @@ class Audio extends Component {
   endCall = () => {
     engine.leaveChannel();
     this.setState({peerIds: [], joinSucceed: false});
-    this.props.navigation.goBack();
+    this.props.navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{name: 'Users'}],
+      }),
+    );
   };
 
   toggleMute = () => {

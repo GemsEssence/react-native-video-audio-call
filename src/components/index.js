@@ -1,13 +1,28 @@
 import React, {useEffect} from 'react';
 import {connect} from 'react-redux';
 import {isEmpty} from 'lodash';
+import {CommonActions} from '@react-navigation/native';
 
 const Entry = (props) => {
   useEffect(() => {
     if (!isEmpty(props.currentUser)) {
-      setTimeout(() => props.navigation.navigate('Users'), 100);
+      setTimeout(() => {
+        props.navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{name: 'Users'}],
+          }),
+        );
+      }, 100);
     } else {
-      setTimeout(() => props.navigation.navigate('Home'), 100);
+      setTimeout(() => {
+        props.navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{name: 'Home'}],
+          }),
+        );
+      }, 100);
     }
   }, []);
   return null;

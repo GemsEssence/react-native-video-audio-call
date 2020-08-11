@@ -4,6 +4,7 @@ import database from '@react-native-firebase/database';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
+import InCallManager from 'react-native-incall-manager';
 
 import styles from './styles';
 import {logout} from '../../state/Users/actions';
@@ -110,6 +111,7 @@ const Users = (props) => {
   };
 
   const initiateCall = (type, receiver) => {
+    InCallManager.start({media: 'audio', auto: true, ringback: '_BUNDLE_'});
     const channel1 = `${user.mobile}-${receiver.mobile}`;
     const channel2 = `${receiver.mobile}-${user.mobile}`;
     let channel = channel1;
