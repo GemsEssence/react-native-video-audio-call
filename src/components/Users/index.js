@@ -66,6 +66,43 @@ const Users = (props) => {
     ]);
   };
 
+  const handleLogout = () => {
+    actions.logout();
+    navigation.navigate('Home');
+  };
+
+  const initiateCall = (type, receiver) => {
+    const channel1 = `${user.mobile}-${receiver.mobile}`;
+    const channel2 = `${receiver.mobile}-${user.mobile}`;
+    let channel = channel1;
+    database()
+      .ref(`/channels/${channel1}`)
+      .on('value', (snapshot) => {
+        if (!snapshot.val()) {
+          database()
+            .ref(`/channels/${channel2}`)
+            .on('value', (data) => {
+              if (data.val()) {
+                channel = channel2;
+              } else {
+                database()
+                  .ref(`/channels/${channel1}`)
+                  .set({channel: channel1});
+              }
+            });
+        }
+        database()
+          .ref(`/callRecords/${receiver.mobile}`)
+          .set({receiver, user, channel, type});
+        navigation.navigate(type, {
+          user,
+          receiver,
+          channel,
+          type,
+        });
+      });
+  };
+
   const renderItem = (item) => {
     const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
     return (
@@ -104,59 +141,11 @@ const Users = (props) => {
     );
   };
 
-  const logout = () => {
-    actions.logout();
-    navigation.navigate('Home');
-  };
-
-  const initiateCall = (type, receiver) => {
-    const channel1 = `${user.mobile}-${receiver.mobile}`;
-    const channel2 = `${receiver.mobile}-${user.mobile}`;
-    let channel = channel1;
-    // database()
-    //   .ref(`/callRecords/${receiver.mobile}`)
-    //   .on('value', (snapshot) => {
-    //     if (snapshot.val()) {
-    //       Alert.alert(
-    //         'Call cannot be connected',
-    //         `${receiver.name}  (${receiver.mobile}) is busy on another call, please try again later!`,
-    //       );
-    //       return false;
-    //     } else {
-    database()
-      .ref(`/channels/${channel1}`)
-      .on('value', (snapshot) => {
-        if (!snapshot.val()) {
-          database()
-            .ref(`/channels/${channel2}`)
-            .on('value', (snapshot) => {
-              if (snapshot.val()) {
-                channel = channel2;
-              } else {
-                database()
-                  .ref(`/channels/${channel1}`)
-                  .set({channel: channel1});
-              }
-            });
-        }
-        database()
-          .ref(`/callRecords/${receiver.mobile}`)
-          .set({receiver, user, channel, type});
-        navigation.navigate(type, {
-          user,
-          receiver,
-          channel,
-          type,
-        });
-      });
-    //   }
-    // });
-  };
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Available Users</Text>
-        <TouchableOpacity onPress={logout}>
+        <TouchableOpacity onPress={handleLogout}>
           <MaterialIcons name="exit-to-app" size={30} color="white" />
         </TouchableOpacity>
       </View>
