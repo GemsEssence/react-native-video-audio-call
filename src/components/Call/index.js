@@ -14,7 +14,14 @@ const Call = (props) => {
   const timeout = setTimeout(() => rejectCall, 30000);
 
   useEffect(() => {
-    InCallManager.startRingtone('_BUNDLE_');
+    InCallManager.startRingtone('_BUNDLE_', [400, 0, 400, 0]);
+    database()
+      .ref(`/callRecords/${receiver.mobile}`)
+      .on('value', (snapshot) => {
+        if (!snapshot.val()) {
+          rejectCall();
+        }
+      });
     return () => {
       InCallManager.stopRingtone();
     };

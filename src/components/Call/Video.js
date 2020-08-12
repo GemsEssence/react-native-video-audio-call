@@ -13,7 +13,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import KeepAwake from 'react-native-keep-awake';
 import database from '@react-native-firebase/database';
 import {CommonActions} from '@react-navigation/native';
-import InCallManager from 'react-native-incall-manager';
 
 import styles from './Style';
 
@@ -33,6 +32,7 @@ class Video extends Component {
       isMute: false,
       showVideo: true,
       showFooterButtons: true,
+      callStarted: true,
     };
     if (Platform.OS === 'android') {
       requestCameraAndAudioPermission().then(_ => {
@@ -48,7 +48,11 @@ class Video extends Component {
     engine.addListener('UserJoined', (data) => {
       const {peerIds} = self.state;
       if (peerIds.indexOf(data) === -1) {
-        self.setState({peerIds: [...peerIds, data]});
+        self.setState({peerIds: [...peerIds, data]}, () => {
+          if (self.state.peerIds.length > 0) {
+            self.setState({callStarted: false});
+          }
+        });
       }
     });
 
@@ -101,14 +105,29 @@ class Video extends Component {
       .ref(`/callRecords/${receiver.mobile}`)
       .on('value', (snapshot) => {
         if (!snapshot.val()) {
+          Alert.alert(
+            'Call Disconnected',
+            'Receiver canceled the call',
+            [
+              {
+                text: 'Call Again',
+                onPress: () => this.startCall(),
+                style: 'cancel',
+              },
+              {
+                text: 'Cancel',
+                onPress: () => this.endCall(),
+              },
+            ],
+            {cancelable: false},
+          );
           this.endCall();
+          return false;
         }
       });
   };
 
   endCall = () => {
-    InCallManager.stopRingback();
-    InCallManager.stop();
     const {receiver} = this.props.route.params;
     database().ref(`/callRecords/${receiver.mobile}`).remove();
     engine.leaveChannel();
@@ -169,6 +188,7 @@ class Video extends Component {
       showVideo,
       isMute,
       showFooterButtons,
+      callStarted,
     } = this.state;
     return (
       <Pressable onPress={this.toggleFooterButtons} style={styles.max}>
@@ -247,9 +267,11 @@ class Video extends Component {
             ) : peerIds.length > 0 ? (
               <RemoteView style={styles.full} uid={peerIds[0]} renderMode={1} />
             ) : (
-              <View style={[styles.full, styles.ringing]}>
-                <Text style={{fontSize: 25}}>Ringing....!</Text>
-              </View>
+              callStarted && (
+                <View style={[styles.full, styles.ringing]}>
+                  <Text style={{fontSize: 25}}>Connecting....!</Text>
+                </View>
+              )
             )}
             <LocalView
               style={
