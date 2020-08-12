@@ -16,11 +16,11 @@ const Stack = createStackNavigator();
 const Navigation = () => {
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+      // Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
     });
 
     messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-      console.log('Message handled in the background!', remoteMessage);
+      // console.log('Message handled in the background!', remoteMessage);
     });
 
     return unsubscribe;

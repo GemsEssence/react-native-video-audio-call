@@ -35,7 +35,13 @@ const Call = (props) => {
 
   const rejectCall = () => {
     InCallManager.stopRingtone();
+    database().ref(`/channels/${channel}`).update({isActive: false});
+    database().ref(`/callRecords/${receiver.mobile}`).off();
+    database().ref(`/active/${receiver.mobile}`).off();
+    database().ref(`/active/${user.mobile}`).off();
     database().ref(`/callRecords/${receiver.mobile}`).remove();
+    database().ref(`/active/${receiver.mobile}`).remove();
+    database().ref(`/active/${user.mobile}`).remove();
     props.navigation.dispatch(
       CommonActions.reset({
         index: 0,
@@ -45,7 +51,7 @@ const Call = (props) => {
   };
   return (
     <View style={styles.callView}>
-      <View style={[styles.innerBubble, {marginBottom: 20, padding:30}]}>
+      <View style={[styles.innerBubble, {marginBottom: 20, padding: 30}]}>
         <View style={[styles.nameBubble, styles.callNameBubble]}>
           <Text style={styles.bubbleText}>{user.name[0].toUpperCase()}</Text>
         </View>

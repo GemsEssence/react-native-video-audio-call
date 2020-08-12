@@ -77,12 +77,21 @@ const Users = (props) => {
     let channel = channel1;
     database()
       .ref(`/channels/${channel1}`)
-      .on('value', (snapshot) => {
+      .once('value')
+      .then((snapshot) => {
         if (!snapshot.val()) {
           database()
             .ref(`/channels/${channel2}`)
-            .on('value', (data) => {
+            .once('value')
+            .then((data) => {
               if (data.val()) {
+                if (data.val().isActive) {
+                  Alert.alert(
+                    'Channel busy !!!',
+                    'It seems some one is already trying to contact you !',
+                  );
+                  return false;
+                }
                 channel = channel2;
               } else {
                 database()
@@ -91,15 +100,40 @@ const Users = (props) => {
               }
             });
         }
+        if (snapshot.val() && snapshot.val().isActive) {
+          Alert.alert(
+            'Channel busy !!!',
+            'It seems some one is already trying to contact you !',
+          );
+          return false;
+        }
+
         database()
-          .ref(`/callRecords/${receiver.mobile}`)
-          .set({receiver, user, channel, type});
-        navigation.navigate(type, {
-          user,
-          receiver,
-          channel,
-          type,
-        });
+          .ref(`/active/${receiver.mobile}`)
+          .once('value')
+          .then((data) => {
+            if (data.val()) {
+              Alert.alert(
+                'User Unavailable',
+                'User is on another call, try again later!',
+              );
+            } else {
+              database().ref(`/channels/${channel}`).update({isActive: true});
+              database()
+                .ref(`/active/${receiver.mobile}`)
+                .set({isActive: true});
+              database().ref(`/active/${user.mobile}`).set({isActive: true});
+              database()
+                .ref(`/callRecords/${receiver.mobile}`)
+                .set({receiver, user, channel, type});
+              navigation.navigate(type, {
+                user,
+                receiver,
+                channel,
+                type,
+              });
+            }
+          });
       });
   };
 

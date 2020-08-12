@@ -128,8 +128,14 @@ class Video extends Component {
   };
 
   endCall = () => {
-    const {receiver} = this.props.route.params;
+    const {user, receiver, channel} = this.props.route.params;
+    database().ref(`/callRecords/${receiver.mobile}`).off();
+    database().ref(`/active/${receiver.mobile}`).off();
+    database().ref(`/active/${user.mobile}`).off();
+    database().ref(`/channels/${channel}`).update({isActive: false});
     database().ref(`/callRecords/${receiver.mobile}`).remove();
+    database().ref(`/active/${receiver.mobile}`).remove();
+    database().ref(`/active/${user.mobile}`).remove();
     engine.leaveChannel();
     clearTimeout(this.timeout);
     this.setState({peerIds: [], joinSucceed: false});
