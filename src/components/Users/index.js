@@ -16,6 +16,7 @@ import invokeApp from 'react-native-invoke-app';
 
 import styles from './styles';
 import {logout} from '../../state/Users/actions';
+import {startCall} from '../../state/Users/operations';
 
 const Users = (props) => {
   const [users, handleUsers] = useState([]);
@@ -41,9 +42,7 @@ const Users = (props) => {
             const dbUser = snapshot.val()[user.mobile].user;
 
             if (!isEqual(appStateVisible, 'active')) {
-              // launch app
               invokeApp();
-
             }
             navigation.navigate('Call', {
               type,
@@ -65,6 +64,7 @@ const Users = (props) => {
               const obj = {
                 mobile,
                 name: snapshot.val()[mobile].name,
+                fcmToken: snapshot.val()[mobile].fcmToken,
               };
               allUsers.push(obj);
             }
@@ -143,6 +143,7 @@ const Users = (props) => {
                 'User is on another call, try again later!',
               );
             } else {
+              actions.startCall({receiver, user, channel, type});
               database().ref(`/channels/${channel}`).update({isActive: true});
               database()
                 .ref(`/active/${receiver.mobile}`)
@@ -199,7 +200,6 @@ const Users = (props) => {
       </View>
     );
   };
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -225,7 +225,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  actions: bindActionCreators({logout}, dispatch),
+  actions: bindActionCreators({logout, startCall}, dispatch),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Users);

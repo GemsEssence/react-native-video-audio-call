@@ -3,6 +3,8 @@ import {Alert} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import messaging from '@react-native-firebase/messaging';
+import PushNotification from 'react-native-push-notification';
+import {isEqual} from 'lodash';
 
 import Home from './Home';
 import Video from './Call/Video';
@@ -13,17 +15,56 @@ import Entry from './index';
 
 const Stack = createStackNavigator();
 
+PushNotification.configure({
+  permissions: {
+    alert: true,
+    badge: true,
+    sound: true,
+  },
+  default: true,
+  popInitialNotification: true,
+  requestPermissions: true,
+});
+
 const Navigation = () => {
+  const displayNotification = (message) => {
+    const title = isEqual(message.data.status, 'start')
+      ? 'Incoming Call !'
+      : 'Missed Call !';
+    PushNotification.localNotification({
+      ticker: 'My Notification Ticker',
+      showWhen: true,
+      autoCancel: true,
+      largeIcon: 'ic_launcher',
+      smallIcon: 'ic_notification',
+      bigText: message.data.message,
+      color: 'green',
+      vibrate: true,
+      vibration: 300,
+      priority: 'high',
+      visibility: 'private',
+      ignoreInForeground: false,
+      messageId: 'google:message_id',
+      invokeApp: true,
+      title,
+      message: message.data.message,
+      userInfo: {},
+      playSound: false,
+      soundName: 'default',
+    });
+  };
+
   useEffect(() => {
-    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+    messaging().onMessage(async (remoteMessage) => {
+      console.log('Message handled in the active!', remoteMessage);
+
+      displayNotification(remoteMessage);
       // Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
     });
-
     messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-      // console.log('Message handled in the background!', remoteMessage);
+      console.log('Message handled in the background!', remoteMessage);
+      displayNotification(remoteMessage);
     });
-
-    return unsubscribe;
   }, []);
   return (
     <NavigationContainer>
