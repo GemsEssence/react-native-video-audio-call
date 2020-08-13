@@ -1,20 +1,36 @@
-import React, {useState, useEffect} from 'react';
-import {View, TouchableOpacity, Text, FlatList, Alert} from 'react-native';
+import React, {useRef, useState, useEffect} from 'react';
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  FlatList,
+  Alert,
+  AppState,
+} from 'react-native';
 import database from '@react-native-firebase/database';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
+import {isEqual} from 'lodash';
+import invokeApp from 'react-native-invoke-app';
 
 import styles from './styles';
 import {logout} from '../../state/Users/actions';
 
 const Users = (props) => {
   const [users, handleUsers] = useState([]);
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const {actions, isAdmin, currentUser, navigation} = props;
   const user = currentUser;
 
-  // const {user} = props.route.params;
+  const _handleAppStateChange = (nextAppState) => {
+    appState.current = nextAppState;
+    setAppStateVisible(appState.current);
+  };
+
   useEffect(() => {
+    AppState.addEventListener('change', _handleAppStateChange);
     database()
       .ref('/callRecords/')
       .on('value', (snapshot) => {
@@ -23,6 +39,12 @@ const Users = (props) => {
           if (keys.includes(user.mobile)) {
             const {type, receiver, channel} = snapshot.val()[user.mobile];
             const dbUser = snapshot.val()[user.mobile].user;
+
+            if (!isEqual(appStateVisible, 'active')) {
+              // launch app
+              invokeApp();
+
+            }
             navigation.navigate('Call', {
               type,
               user: dbUser,
@@ -50,6 +72,9 @@ const Users = (props) => {
           handleUsers(allUsers);
         }
       });
+    return () => {
+      AppState.removeEventListener('change', _handleAppStateChange);
+    };
   }, []);
 
   const deleteUser = (item) => {

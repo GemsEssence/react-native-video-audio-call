@@ -1,4 +1,8 @@
 rootProject.name = 'CallingApp'
+include ':react-native-invoke-app'
+project(':react-native-invoke-app').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-invoke-app/android')
+include ':react-native-launch-application'
+project(':react-native-launch-application').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-launch-application/android')
 include ':react-native-vector-icons'
 project(':react-native-vector-icons').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-vector-icons/android')
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
