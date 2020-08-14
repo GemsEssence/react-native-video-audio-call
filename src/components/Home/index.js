@@ -54,6 +54,7 @@ const Home = (props) => {
       <TextInput
         autoFocus
         editable
+        maxLength={10}
         style={styles.input}
         placeholder="Enter Your Mobile Number"
         value={mobile}

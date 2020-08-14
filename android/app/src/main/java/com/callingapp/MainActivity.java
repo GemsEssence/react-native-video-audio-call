@@ -2,6 +2,7 @@ package com.callingapp;
 
 import com.facebook.react.ReactActivity;
 import android.os.Bundle;
+import com.codegulp.invokeapp.RNInvokeApp;
 
 public class MainActivity extends ReactActivity {
 
@@ -12,6 +13,11 @@ public class MainActivity extends ReactActivity {
   @Override
   protected String getMainComponentName() {
     return "CallingApp";
+  }
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    RNInvokeApp.sendEvent();
   }
 
 }

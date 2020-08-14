@@ -24,6 +24,7 @@
     "react-native-agora": "^3.0.1-beta.7",
     "react-native-gesture-handler": "^1.7.0",
     "react-native-incall-manager": "^3.2.7",
+    "react-native-invoke-app": "git+https://github.com/nagdev-k/react-native-invoke-app.git",
     "react-native-keep-awake": "^4.0.0",
     "react-native-push-notification": "^5.0.1",
     "react-native-reanimated": "^1.10.1",
