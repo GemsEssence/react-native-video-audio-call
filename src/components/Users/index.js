@@ -12,7 +12,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {isEqual} from 'lodash';
-import invokeApp from 'react-native-invoke-app';
+// import invokeApp from 'react-native-invoke-app';
 
 import styles from './styles';
 import {logout} from '../../state/Users/actions';
@@ -42,7 +42,7 @@ const Users = (props) => {
             const dbUser = snapshot.val()[user.mobile].user;
 
             if (!isEqual(appStateVisible, 'active')) {
-              invokeApp();
+              // invokeApp();
             }
             navigation.navigate('Call', {
               type,
@@ -164,7 +164,9 @@ const Users = (props) => {
   };
 
   const renderItem = (item) => {
-    const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+    const randomColor = `#${Math.floor(Math.random() * 16777215)
+      .toString(16)
+      .padStart(6, '0')}`;
     return (
       <View key={item.item.mobile} style={styles.listItemContainer}>
         <View style={[styles.row, {width: '55%'}]}>

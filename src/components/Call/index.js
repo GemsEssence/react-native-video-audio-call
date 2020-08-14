@@ -52,7 +52,7 @@ const Call = (props) => {
   return (
     <View style={styles.callView}>
       <View style={[styles.innerBubble, {marginBottom: 20, padding: 30}]}>
-        <View style={[styles.nameBubble, styles.callNameBubble]}>
+        <View style={styles.nameBubble}>
           <Text style={styles.bubbleText}>{user.name[0].toUpperCase()}</Text>
         </View>
       </View>

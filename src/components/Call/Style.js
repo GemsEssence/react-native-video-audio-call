@@ -2,7 +2,7 @@
 
 import { StyleSheet, Dimensions } from 'react-native';
 
-const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
 
 let dimensions = {
     width: Dimensions.get('window').width,
@@ -75,10 +75,10 @@ export default StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 10,
         borderRadius: 50,
-        fontSize: 25,
-        fontWeight: 'bold',
         justifyContent: 'center',
         alignItems: 'center',
+        width: 200,
+        height: 200,
     },
     innerBubble: {
         opacity: 0.8,
@@ -120,11 +120,7 @@ export default StyleSheet.create({
         color: 'white',
         fontSize: 100,
     },
-    callNameBubble: {
-        width: 200,
-        height: 200,
-        backgroundColor: randomColor,
-    },
+
     callView: {
         flex: 1,
         justifyContent: 'center',
@@ -135,5 +131,10 @@ export default StyleSheet.create({
     callerText: {
         fontSize: 25,
         marginBottom: 50,
+    },
+    audioCallFullView: {
+        backgroundColor: 'white',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

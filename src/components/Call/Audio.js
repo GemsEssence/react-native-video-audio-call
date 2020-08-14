@@ -1,13 +1,16 @@
-import requestCameraAndAudioPermission from '../permission';
 import React, {Component} from 'react';
-import {View, Text, TouchableOpacity, Platform} from 'react-native';
-import RtcEngine, {RtcRemoteView} from 'react-native-agora';
+import {View, Text, TouchableOpacity, Platform, Alert} from 'react-native';
+import RtcEngine from 'react-native-agora';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import KeepAwake from 'react-native-keep-awake';
+import {connect} from 'react-redux';
+import {isEqual} from 'lodash';
+import database from '@react-native-firebase/database';
 import {CommonActions} from '@react-navigation/native';
 
 import styles from './Style';
+import requestCameraAndAudioPermission from '../permission';
 
-let RemoteView = RtcRemoteView.SurfaceView;
 let engine;
 class Audio extends Component {
   constructor(props) {
@@ -32,32 +35,95 @@ class Audio extends Component {
     let self = this;
     engine = await RtcEngine.create(self.state.appid);
     engine.disableVideo();
-    engine.addListener('UserJoined', data => {
+    engine.addListener('UserJoined', (data) => {
       const {peerIds} = self.state;
       if (peerIds.indexOf(data) === -1) {
         self.setState({peerIds: [...peerIds, data]});
       }
     });
 
-    engine.addListener('UserOffline', data => {
+    engine.addListener('UserOffline', (data) => {
       self.setState({
-        peerIds: self.state.peerIds.filter(uid => uid !== data),
+        peerIds: self.state.peerIds.filter((uid) => uid !== data),
       });
     });
 
-    engine.addListener('JoinChannelSuccess', data => {
+    engine.addListener('JoinChannelSuccess', (data) => {
       self.setState({joinSucceed: true});
     });
     this.startCall();
   }
 
+  callWaiting = () => {
+    this.timeout = setTimeout(() => {
+      if (this.state.peerIds.length === 0) {
+        Alert.alert(
+          'Call Disconnected',
+          "Receiver didn't picked the call",
+          [
+            {
+              text: 'Call Again',
+              onPress: () => this.startCall(),
+              style: 'cancel',
+            },
+            {
+              text: 'Cancel',
+              onPress: () => this.endCall(),
+            },
+          ],
+          {cancelable: false},
+        );
+      }
+    }, 30000);
+  };
+
   startCall = () => {
+    KeepAwake.activate();
+    this.timeout = setTimeout(
+      () => this.setState(() => ({showFooterButtons: false})),
+      5000,
+    );
+    this.callWaiting();
     this.setState({joinSucceed: true});
     engine.joinChannel(null, this.state.channelName, null, 0);
+    const {receiver} = this.props.route.params;
+    database()
+      .ref(`/callRecords/${receiver.mobile}`)
+      .on('value', (snapshot) => {
+        if (!snapshot.val()) {
+          Alert.alert(
+            'Call Disconnected',
+            'Receiver canceled the call',
+            [
+              {
+                text: 'Call Again',
+                onPress: () => this.startCall(),
+                style: 'cancel',
+              },
+              {
+                text: 'Cancel',
+                onPress: () => this.endCall(),
+              },
+            ],
+            {cancelable: false},
+          );
+          this.endCall();
+          return false;
+        }
+      });
   };
 
   endCall = () => {
+    const {user, receiver, channel} = this.props.route.params;
+    database().ref(`/callRecords/${receiver.mobile}`).off();
+    database().ref(`/active/${receiver.mobile}`).off();
+    database().ref(`/active/${user.mobile}`).off();
+    database().ref(`/channels/${channel}`).update({isActive: false});
+    database().ref(`/callRecords/${receiver.mobile}`).remove();
+    database().ref(`/active/${receiver.mobile}`).remove();
+    database().ref(`/active/${user.mobile}`).remove();
     engine.leaveChannel();
+    clearTimeout(this.timeout);
     this.setState({peerIds: [], joinSucceed: false});
     this.props.navigation.dispatch(
       CommonActions.reset({
@@ -69,7 +135,7 @@ class Audio extends Component {
 
   toggleMute = () => {
     this.setState(
-      prevState => ({isMute: !prevState.isMute}),
+      (prevState) => ({isMute: !prevState.isMute}),
       () => {
         if (this.state.isMute) {
           engine.enableLocalAudio(false);
@@ -82,7 +148,7 @@ class Audio extends Component {
 
   toggleSpeaker = () => {
     this.setState(
-      prevState => ({enableSpeaker: !prevState.enableSpeaker}),
+      (prevState) => ({enableSpeaker: !prevState.enableSpeaker}),
       () => {
         if (this.state.enableSpeaker) {
           engine.setEnableSpeakerphone(false);
@@ -93,102 +159,38 @@ class Audio extends Component {
     );
   };
 
+  componentWillUnmount() {
+    KeepAwake.deactivate();
+  }
+
   audioView() {
-    const {
-      joinSucceed,
-      peerIds,
-      channelName,
-      enableSpeaker,
-      isMute,
-    } = this.state;
-    const {user} = this.props.route.params;
+    const {joinSucceed, peerIds, enableSpeaker, isMute} = this.state;
+    const {user, receiver} = this.props.route.params;
+    console.log(user, receiver);
+    const {currentUser} = this.props;
+    console.log('current user', currentUser);
+
     return (
       <View style={styles.max}>
         {!joinSucceed ? (
           <View />
         ) : (
           <View style={styles.fullView}>
-            {peerIds.length > 3 ? (
-              <View style={styles.full}>
-                <View style={styles.halfViewRow}>
-                  <RemoteView
-                    style={styles.half}
-                    channelId={channelName}
-                    uid={peerIds[0]}
-                    renderMode={1}
-                  />
-                  <RemoteView
-                    style={styles.half}
-                    channelId={channelName}
-                    uid={peerIds[1]}
-                    renderMode={1}
-                  />
-                </View>
-                <View style={styles.halfViewRow}>
-                  <RemoteView
-                    style={styles.half}
-                    channelId={channelName}
-                    uid={peerIds[2]}
-                    renderMode={1}
-                  />
-                  <RemoteView
-                    style={styles.half}
-                    channelId={channelName}
-                    uid={peerIds[3]}
-                    renderMode={1}
-                  />
+            <View style={[styles.fullView, styles.audioCallFullView]}>
+              <View style={[styles.innerBubble, {marginBottom: 50}]}>
+                <View style={styles.nameBubble}>
+                  <Text style={styles.bubbleText}>
+                    {isEqual(currentUser.mobile, user.mobile)
+                      ? receiver.name[0].toUpperCase()
+                      : user.name[0].toUpperCase()}
+                  </Text>
                 </View>
               </View>
-            ) : peerIds.length > 2 ? (
-              <View style={styles.full}>
-                <View style={styles.half} channelId={channelName}>
-                  <RemoteView
-                    style={styles.full}
-                    uid={peerIds[0]}
-                    renderMode={1}
-                  />
-                </View>
-                <View style={styles.halfViewRow}>
-                  <RemoteView
-                    style={styles.half}
-                    channelId={channelName}
-                    uid={peerIds[1]}
-                    renderMode={1}
-                  />
-                  <RemoteView
-                    style={styles.half}
-                    channelId={channelName}
-                    uid={peerIds[2]}
-                    renderMode={1}
-                  />
-                </View>
-              </View>
-            ) : peerIds.length > 1 ? (
-              <View style={styles.full}>
-                <RemoteView
-                  style={styles.full}
-                  uid={peerIds[0]}
-                  renderMode={1}
-                />
-                <RemoteView
-                  style={styles.full}
-                  uid={peerIds[1]}
-                  renderMode={1}
-                />
-              </View>
-            ) : peerIds.length > 0 ? ( //view for videostream
-              <RemoteView style={styles.full} uid={peerIds[0]} renderMode={1} />
-            ) : (
-              <View>
-                <Text style={styles.noUserText}> No users connected </Text>
-              </View>
-            )}
-            <View style={styles.localVideoStyle}>
-              <View style={styles.innerBubble}>
-                <Text style={styles.nameBubble}>
-                  {user.name[0].toUpperCase()}
-                </Text>
-              </View>
+              <Text style={styles.callerText}>
+                {peerIds.length < 1
+                  ? `${user.name} is calling ... !`
+                  : 'Call Connected !'}
+              </Text>
             </View>
           </View>
         )}
@@ -228,4 +230,9 @@ class Audio extends Component {
     return this.audioView();
   }
 }
-export default Audio;
+
+const mapStateToProps = (state) => ({
+  currentUser: state.Users.currentUser,
+});
+
+export default connect(mapStateToProps)(Audio);

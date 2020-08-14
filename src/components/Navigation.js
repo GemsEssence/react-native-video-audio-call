@@ -36,7 +36,7 @@ const Navigation = () => {
       showWhen: true,
       autoCancel: true,
       largeIcon: 'ic_launcher',
-      smallIcon: 'ic_notification',
+      smallIcon: 'ic_launcher',
       bigText: message.data.message,
       color: 'green',
       vibrate: true,
